@@ -1,0 +1,4 @@
+name: DecisiveBattle
+version: '1.0-SNAPSHOT'
+main: site.backrer.decisiveBattle.DecisiveBattle
+api-version: '1.20'
