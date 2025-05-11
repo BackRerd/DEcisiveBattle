@@ -11,7 +11,7 @@ public class SceneDAO {
     public void insertScene(Scene scene) {
         String sql = "INSERT INTO scene (code, max_player_size, min_player_size, scene_name, pos1_x, pos1_y, pos1_z, pos2_x, pos2_y, pos2_z, world_name) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         try (Connection conn = DBUtil.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setString(1, scene.getCode());
+            ps.setInt(1, scene.getCode());
             ps.setInt(2, scene.getMaxPlayerSize());
             ps.setInt(3, scene.getMinPlayerSize());
             ps.setString(4, scene.getSceneName());
@@ -52,7 +52,7 @@ public class SceneDAO {
             if (rs.next()) {
                 return new Scene(
                         rs.getInt("id"),
-                        rs.getString("code"),
+                        rs.getInt("code"),
                         rs.getInt("max_player_size"),
                         rs.getInt("min_player_size"),
                         rs.getString("scene_name"),
@@ -71,7 +71,7 @@ public class SceneDAO {
     public void updateScene(Scene scene) {
         String sql = "UPDATE scene SET code = ?, max_player_size = ?, min_player_size = ?, scene_name = ?, pos1_x = ?, pos1_y = ?, pos1_z = ?, pos2_x = ?, pos2_y = ?, pos2_z = ?, world_name = ? WHERE id = ?";
         try (Connection conn = DBUtil.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setString(1, scene.getCode());
+            ps.setInt(1, scene.getCode());
             ps.setInt(2, scene.getMaxPlayerSize());
             ps.setInt(3, scene.getMinPlayerSize());
             ps.setString(4, scene.getSceneName());
