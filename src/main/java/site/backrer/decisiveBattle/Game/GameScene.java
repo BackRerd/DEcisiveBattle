@@ -5,15 +5,19 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.HandlerList;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
+import org.bukkit.scheduler.BukkitTask;
 import site.backrer.decisiveBattle.DecisiveBattle;
 import site.backrer.decisiveBattle.Entity.Vector3;
+import site.backrer.decisiveBattle.Utils.RunnableUtil;
+import site.backrer.decisiveBattle.actions.ContinuouslyExecutingEvents;
+import site.backrer.decisiveBattle.actions.NotifyAfterDelay;
 
 import java.util.ArrayList;
 import java.util.List;
 
 
 public class GameScene extends BukkitRunnable {
-    private String code; //场景代号
+    private int code; //场景代号
     private int maxPlayerSize; //最大玩家数量
     private int minPlayerSize; //最小多少玩家开始游戏
     private String sceneName; //场景名称
@@ -28,7 +32,7 @@ public class GameScene extends BukkitRunnable {
     List<Player> thisPlayers = new ArrayList<Player>(); //存放记录玩家表
     boolean isStarted = false; //场景是否处于开启状态
 
-    public GameScene(String code, int maxPlayerSize, int minPlayerSize, String sceneName, double pos1, double pos2, String worldName) {
+    public GameScene(int code, int maxPlayerSize, int minPlayerSize, String sceneName, double pos1, double pos2, String worldName) {
         this.code = code;
         this.maxPlayerSize = maxPlayerSize;
         this.minPlayerSize = minPlayerSize;
@@ -46,7 +50,20 @@ public class GameScene extends BukkitRunnable {
 
     @Override
     public void run() {
-
+        //处理事件
+    }
+    //玩家进入场景事件:0加入成功,1加入失败以存在该玩家。
+    public int joinPlayer(Player player){
+        if (!thisPlayers.contains(player)) {
+            thisPlayers.add(player);
+            return 0;
+        }
+        return 1;
+    }
+    //玩家退出场景事件:0退出成果
+    public int leavePlayer(Player player){
+        thisPlayers.remove(player);
+        return 0;
     }
     // 初始化并启动任务
     public void startTask(long delayTicks, long intervalTicks) {
@@ -62,5 +79,54 @@ public class GameScene extends BukkitRunnable {
         if (listener != null) {
             HandlerList.unregisterAll(listener);
         }
+    }
+
+    ///  get And set
+    public int getCode() {
+        return code;
+    }
+
+    public int getMaxPlayerSize() {
+        return maxPlayerSize;
+    }
+
+    public int getMinPlayerSize() {
+        return minPlayerSize;
+    }
+
+    public String getSceneName() {
+        return sceneName;
+    }
+
+    public double getPos1() {
+        return pos1;
+    }
+
+    public double getPos2() {
+        return pos2;
+    }
+
+    public String getWorldName() {
+        return worldName;
+    }
+
+    public List<Vector3> getSpawns() {
+        return spawns;
+    }
+
+    public List<Vector3> getBoxs() {
+        return boxs;
+    }
+
+    public GameListener getListener() {
+        return listener;
+    }
+
+    public List<Player> getThisPlayers() {
+        return thisPlayers;
+    }
+
+    public boolean isStarted() {
+        return isStarted;
     }
 }
