@@ -2,3 +2,10 @@ name: DecisiveBattle
 version: '1.0-SNAPSHOT'
 main: site.backrer.decisiveBattle.DecisiveBattle
 api-version: '1.20'
+commands:
+  dbs:
+    description: 管理 DBS 场景的主命令
+    usage: /<command> <subcommands>
+    aliases: [dbsetup, db]
+    permission: dbs.admin  # 只有拥有 'dbs.use' 权限的玩家才能执行此指令
+    permission-message: "你没有权限执行该命令。"

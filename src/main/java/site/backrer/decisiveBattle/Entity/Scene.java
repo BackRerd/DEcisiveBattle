@@ -2,32 +2,64 @@ package site.backrer.decisiveBattle.Entity;
 
 public class Scene {
     private int id;
-    private String code;
+    private int code;
     private int maxPlayerSize;
     private int minPlayerSize;
     private String sceneName;
-    private double pos1;
-    private double pos2;
+    private double pos1_x;
+    private double pos1_y;
+    private double pos1_z;
+    private double pos2_x;
+    private double pos2_y;
+    private double pos2_z;
     private String worldName;
 
-    public Scene(int id, String code, int maxPlayerSize, int minPlayerSize, String sceneName, double pos1, double pos2, String worldName) {
+    // 构造函数
+    public Scene(int id, int code, int maxPlayerSize, int minPlayerSize, String sceneName,
+                 double pos1_x, double pos1_y, double pos1_z,
+                 double pos2_x, double pos2_y, double pos2_z, String worldName) {
         this.id = id;
         this.code = code;
         this.maxPlayerSize = maxPlayerSize;
         this.minPlayerSize = minPlayerSize;
         this.sceneName = sceneName;
-        this.pos1 = pos1;
-        this.pos2 = pos2;
+        this.pos1_x = pos1_x;
+        this.pos1_y = pos1_y;
+        this.pos1_z = pos1_z;
+        this.pos2_x = pos2_x;
+        this.pos2_y = pos2_y;
+        this.pos2_z = pos2_z;
         this.worldName = worldName;
     }
 
-    public String getCode() { return code; }
+    // 不带ID的构造函数（用于插入时）
+    public Scene(int code, int maxPlayerSize, int minPlayerSize, String sceneName,
+                 double pos1_x, double pos1_y, double pos1_z,
+                 double pos2_x, double pos2_y, double pos2_z, String worldName) {
+        this.code = code;
+        this.maxPlayerSize = maxPlayerSize;
+        this.minPlayerSize = minPlayerSize;
+        this.sceneName = sceneName;
+        this.pos1_x = pos1_x;
+        this.pos1_y = pos1_y;
+        this.pos1_z = pos1_z;
+        this.pos2_x = pos2_x;
+        this.pos2_y = pos2_y;
+        this.pos2_z = pos2_z;
+        this.worldName = worldName;
+    }
+
+    // Getter方法
+    public int getCode() { return code; }
     public int getMaxPlayerSize() { return maxPlayerSize; }
     public int getMinPlayerSize() { return minPlayerSize; }
     public String getSceneName() { return sceneName; }
-    public double getPos1() { return pos1; }
-    public double getPos2() { return pos2; }
+    public double getPos1_x() { return pos1_x; }
+    public double getPos1_y() { return pos1_y; }
+    public double getPos1_z() { return pos1_z; }
+    public double getPos2_x() { return pos2_x; }
+    public double getPos2_y() { return pos2_y; }
+    public double getPos2_z() { return pos2_z; }
     public String getWorldName() { return worldName; }
     public int getId() { return id; }
 }
-
