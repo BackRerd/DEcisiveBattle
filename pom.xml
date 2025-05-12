@@ -6,7 +6,7 @@
 
     <groupId>site.backrer</groupId>
     <artifactId>decisivebattle</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>1.0</version>
     <packaging>jar</packaging>
 
     <name>decisivebattle</name>
@@ -69,4 +69,12 @@
             <scope>provided</scope>
         </dependency>
     </dependencies>
+
+    <distributionManagement>
+        <repository>
+            <id>aliyun-releases</id>
+            <url>https://maven.aliyun.com/epository/maven-releases/</url>
+        </repository>
+    </distributionManagement>
+
 </project>

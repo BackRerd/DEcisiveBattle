@@ -53,7 +53,15 @@ public class BoxDAO {
             e.printStackTrace();
         }
     }
-
+    public void deleteBoxesById(int Id) {
+        String sql = "DELETE FROM box WHERE id = ?";
+        try (Connection conn = DBUtil.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, Id);
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
 
     public void deleteBoxesBySceneId(int sceneId) {
         String sql = "DELETE FROM box WHERE scene_id = ?";

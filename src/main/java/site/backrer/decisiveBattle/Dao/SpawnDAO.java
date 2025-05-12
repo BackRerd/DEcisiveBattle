@@ -40,6 +40,15 @@ public class SpawnDAO {
         }
         return list;
     }
+    public void deleteSpawnsById(int Id) {
+        String sql = "DELETE FROM spawn WHERE id = ?";
+        try (Connection conn = DBUtil.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, Id);
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
     public void updateSpawn(int id, Vector3 vec) {
         String sql = "UPDATE spawn SET x = ?, y = ?, z = ?, world_name = ? WHERE id = ?";
         try (Connection conn = DBUtil.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {

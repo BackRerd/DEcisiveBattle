@@ -6,13 +6,18 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import site.backrer.decisiveBattle.Dao.BoxDAO;
 import site.backrer.decisiveBattle.Dao.SceneDAO;
+import site.backrer.decisiveBattle.Dao.SpawnDAO;
 import site.backrer.decisiveBattle.DecisiveBattle;
 import site.backrer.decisiveBattle.Entity.Scene;
 import site.backrer.decisiveBattle.Entity.Vector3;
 import site.backrer.decisiveBattle.Utils.VectorUtils;
 
 public class DbsCommand implements CommandExecutor {
+    private final SceneDAO sceneDAO = new SceneDAO();
+    private final SpawnDAO spawnDAO = new SpawnDAO();
+    private final BoxDAO boxDAO = new BoxDAO();
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
@@ -65,16 +70,16 @@ public class DbsCommand implements CommandExecutor {
                         if (args.length < 4) {
                             player.sendMessage("用法: /dbs edit <代号> name <新名称>");
                         } else {
-                            editName(code, args[3]);
+                            editName(player,code, args[3]);
                         }
                         break;
 
                     case "addspawn":
-                        addSpawn(code, player.getLocation());
+                        addSpawn(player,code, player.getLocation());
                         break;
 
                     case "addbox":
-                        addBox(code, player.getLocation());
+                        addBox(player,code, player.getLocation());
                         break;
 
                     case "listspawn":
@@ -86,14 +91,19 @@ public class DbsCommand implements CommandExecutor {
                         break;
 
                     case "removespawn":
+                        if (args.length < 4) {
+                            player.sendMessage("用法: /dbs edit <代号> " + subCommand + " <id>");
+                        } else {
+                            removeItem(0,player,code, subCommand, args[3]);
+                        }
+                        break;
                     case "removebox":
                         if (args.length < 4) {
                             player.sendMessage("用法: /dbs edit <代号> " + subCommand + " <id>");
                         } else {
-                            removeItem(code, subCommand, args[3]);
+                            removeItem(1,player,code, subCommand, args[3]);
                         }
                         break;
-
                     default:
                         player.sendMessage("未知子命令: " + subCommand);
                         break;
@@ -121,7 +131,6 @@ public class DbsCommand implements CommandExecutor {
     private void createGame(Player player,String code, String name, String min, String max) {
         // 实现游戏创建逻辑
         System.out.println("创建游戏: " + code + " 名称: " + name);
-        SceneDAO sceneDAO = new SceneDAO();
         Vector3 loc1 = new Vector3(
                 DecisiveBattle.getCurrentConfig().getConfig().getDouble(player.getName()+".pos1"+"x"),
                 DecisiveBattle.getCurrentConfig().getConfig().getDouble(player.getName()+".pos1"+"y"),
@@ -134,6 +143,10 @@ public class DbsCommand implements CommandExecutor {
                 DecisiveBattle.getCurrentConfig().getConfig().getDouble(player.getName()+".pos1"+"z"),
                 DecisiveBattle.getCurrentConfig().getConfig().getString(player.getName()+".name"+"name")
         );
+        if (loc1.getX() == 0 || loc2.getX() == 0){
+            player.sendMessage("不存在位置坐标");
+            return;
+        }
         //实体类初始化
         Scene scene = new Scene(
                 Integer.parseInt(code),
@@ -150,19 +163,23 @@ public class DbsCommand implements CommandExecutor {
         );
         //插入
         sceneDAO.insertScene(scene);
-
     }
-
-    private void editName(String code, String newName) {
-        // 修改名称逻辑
+    // 修改名称逻辑
+    private void editName(Player player,String code, String newName) {
+        Scene sceneByCode = sceneDAO.getSceneByCode(code);
+        sceneByCode.setSceneName(newName);
+        sceneDAO.updateScene(sceneByCode);
+        player.sendMessage("名称修改完成: " + newName);
     }
-
-    private void addSpawn(String code, Location loc) {
-        // 添加出生点
+    // 添加出生点
+    private void addSpawn(Player player,String code, Location loc) {
+        spawnDAO.insertSpawn(Integer.parseInt(code),VectorUtils.fromLocation(loc));
+        player.sendMessage("位置已添加:" + locToString(loc));
     }
-
-    private void addBox(String code, Location loc) {
-        // 添加宝箱
+    // 添加宝箱
+    private void addBox(Player player,String code, Location loc) {
+        boxDAO.insertBox(Integer.parseInt(code),VectorUtils.fromLocation(loc));
+        player.sendMessage("宝箱已添加:" + locToString(loc));
     }
 
     private void listSpawns(String code, Player player) {
@@ -173,13 +190,15 @@ public class DbsCommand implements CommandExecutor {
         // 列宝箱
     }
 
-    private void removeItem(String code, String type, String idStr) {
-        try {
-            int id = Integer.parseInt(idStr);
-            // 删除指定 id 的出生点或宝箱
-        } catch (NumberFormatException e) {
-            // id 不是数字
+    private void removeItem(int z,Player player,String code, String type, String idStr) {
+        if (z == 0){
+            spawnDAO.deleteSpawnsById(Integer.parseInt(idStr));
+        }else if (z == 1){
+            boxDAO.deleteBoxesById(Integer.parseInt(idStr));
+        }else {
+            player.sendMessage("未知条件");
         }
+        player.sendMessage("删除成功!");
     }
 
     private String locToString(Location loc) {
