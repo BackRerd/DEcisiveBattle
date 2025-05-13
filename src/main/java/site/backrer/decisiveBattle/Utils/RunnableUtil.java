@@ -17,7 +17,7 @@ public class RunnableUtil {
             }
         }.runTaskLater(DecisiveBattle.getPlugin(), time * TwoZero);
     }
-    //每time秒执行一次
+    //每time秒执行一次,isTick为true时候自动结束
     public static BukkitTask startRepeating(ContinuouslyExecutingEvents continuouslyExecutingEvents,long time){
         return new BukkitRunnable(){
 

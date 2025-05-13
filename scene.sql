@@ -26,6 +26,18 @@ CREATE TABLE spawn (
                        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
                        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间'
 );
+CREATE TABLE `leave` (
+                         id INT AUTO_INCREMENT PRIMARY KEY COMMENT '主键ID',
+                         scene_id INT NOT NULL COMMENT '场景ID (外键关联场景表)',
+                         x DOUBLE NOT NULL COMMENT 'X坐标',
+                         y DOUBLE NOT NULL COMMENT 'Y坐标',
+                         z DOUBLE NOT NULL COMMENT 'Z坐标',
+                         world_name VARCHAR(100) NOT NULL COMMENT '世界名称',
+                         FOREIGN KEY (scene_id) REFERENCES scene(id) ON DELETE CASCADE ON UPDATE CASCADE,
+                         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+                         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间'
+);
+
 CREATE TABLE box (
                      id INT AUTO_INCREMENT PRIMARY KEY COMMENT '主键ID',
                      scene_id INT NOT NULL COMMENT '场景ID (外键关联场景表)',

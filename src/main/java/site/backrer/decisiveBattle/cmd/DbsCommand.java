@@ -7,6 +7,7 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import site.backrer.decisiveBattle.Dao.BoxDAO;
+import site.backrer.decisiveBattle.Dao.LeaveDAO;
 import site.backrer.decisiveBattle.Dao.SceneDAO;
 import site.backrer.decisiveBattle.Dao.SpawnDAO;
 import site.backrer.decisiveBattle.DecisiveBattle;
@@ -18,6 +19,7 @@ public class DbsCommand implements CommandExecutor {
     private final SceneDAO sceneDAO = new SceneDAO();
     private final SpawnDAO spawnDAO = new SpawnDAO();
     private final BoxDAO boxDAO = new BoxDAO();
+    private final LeaveDAO leaveDAO = new LeaveDAO();
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
@@ -81,6 +83,9 @@ public class DbsCommand implements CommandExecutor {
                     case "addbox":
                         addBox(player,code, player.getLocation());
                         break;
+                    case "leavespawn":
+                        leaveSpawn(player,code, player.getLocation());
+                        break;
 
                     case "listspawn":
                         listSpawns(code, player);
@@ -95,6 +100,13 @@ public class DbsCommand implements CommandExecutor {
                             player.sendMessage("用法: /dbs edit <代号> " + subCommand + " <id>");
                         } else {
                             removeItem(0,player,code, subCommand, args[3]);
+                        }
+                        break;
+                    case "removeleave":
+                        if (args.length < 4) {
+                            player.sendMessage("用法: /dbs edit <代号> " + subCommand + " <id>");
+                        } else {
+                            removeItem(2,player,code, subCommand, args[3]);
                         }
                         break;
                     case "removebox":
@@ -135,13 +147,13 @@ public class DbsCommand implements CommandExecutor {
                 DecisiveBattle.getCurrentConfig().getConfig().getDouble(player.getName()+".pos1"+"x"),
                 DecisiveBattle.getCurrentConfig().getConfig().getDouble(player.getName()+".pos1"+"y"),
                 DecisiveBattle.getCurrentConfig().getConfig().getDouble(player.getName()+".pos1"+"z"),
-                DecisiveBattle.getCurrentConfig().getConfig().getString(player.getName()+".name"+"name")
+                DecisiveBattle.getCurrentConfig().getConfig().getString(player.getName()+".pos1"+"name")
         );
         Vector3 loc2 = new Vector3(
                 DecisiveBattle.getCurrentConfig().getConfig().getDouble(player.getName()+".pos1"+"x"),
                 DecisiveBattle.getCurrentConfig().getConfig().getDouble(player.getName()+".pos1"+"y"),
                 DecisiveBattle.getCurrentConfig().getConfig().getDouble(player.getName()+".pos1"+"z"),
-                DecisiveBattle.getCurrentConfig().getConfig().getString(player.getName()+".name"+"name")
+                DecisiveBattle.getCurrentConfig().getConfig().getString(player.getName()+".pos2"+"name")
         );
         if (loc1.getX() == 0 || loc2.getX() == 0){
             player.sendMessage("不存在位置坐标");
@@ -161,6 +173,7 @@ public class DbsCommand implements CommandExecutor {
                 loc2.getZ(),
                 loc2.getWordName()
         );
+        System.out.println(scene.toString());
         //插入
         sceneDAO.insertScene(scene);
     }
@@ -175,6 +188,11 @@ public class DbsCommand implements CommandExecutor {
     private void addSpawn(Player player,String code, Location loc) {
         spawnDAO.insertSpawn(Integer.parseInt(code),VectorUtils.fromLocation(loc));
         player.sendMessage("位置已添加:" + locToString(loc));
+    }
+    // 添加出生点
+    private void leaveSpawn(Player player,String code, Location loc) {
+        spawnDAO.insertSpawn(Integer.parseInt(code),VectorUtils.fromLocation(loc));
+        player.sendMessage("离开位置已添加:" + locToString(loc));
     }
     // 添加宝箱
     private void addBox(Player player,String code, Location loc) {
@@ -195,7 +213,9 @@ public class DbsCommand implements CommandExecutor {
             spawnDAO.deleteSpawnsById(Integer.parseInt(idStr));
         }else if (z == 1){
             boxDAO.deleteBoxesById(Integer.parseInt(idStr));
-        }else {
+        } else if (z == 2) {
+            leaveDAO.deleteSpawnsById(Integer.parseInt(idStr));
+        } else {
             player.sendMessage("未知条件");
         }
         player.sendMessage("删除成功!");

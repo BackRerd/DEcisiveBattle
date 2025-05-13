@@ -75,4 +75,22 @@ public class Scene {
     public void setPos2_y(double pos2_y) {this.pos2_y = pos2_y;}
     public void setPos2_z(double pos2_z) {this.pos2_z = pos2_z;}
     public void setWorldName(String worldName) {this.worldName = worldName;}
+
+    @Override
+    public String toString() {
+        return "Scene{" +
+                "id=" + id +
+                ", code=" + code +
+                ", maxPlayerSize=" + maxPlayerSize +
+                ", minPlayerSize=" + minPlayerSize +
+                ", sceneName='" + sceneName + '\'' +
+                ", pos1_x=" + pos1_x +
+                ", pos1_y=" + pos1_y +
+                ", pos1_z=" + pos1_z +
+                ", pos2_x=" + pos2_x +
+                ", pos2_y=" + pos2_y +
+                ", pos2_z=" + pos2_z +
+                ", worldName='" + worldName + '\'' +
+                '}';
+    }
 }
