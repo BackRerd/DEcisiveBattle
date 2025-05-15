@@ -49,3 +49,19 @@ CREATE TABLE box (
                      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
                      updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间'
 );
+
+CREATE TABLE item_package (
+                              id INT AUTO_INCREMENT PRIMARY KEY,
+                              code VARCHAR(100) NOT NULL COMMENT '物品包代号',
+                              name VARCHAR(255) NOT NULL COMMENT '物品包名称',
+                              base64 TEXT COMMENT '物品的 base64 编码',
+                              probability VARCHAR(10) NOT NULL COMMENT '概率'
+);
+CREATE TABLE scene_item_binding (
+                                    id INT AUTO_INCREMENT PRIMARY KEY,
+                                    scene_id INT NOT NULL COMMENT '场景 ID',
+                                    item_package_code VARCHAR(100) NOT NULL COMMENT '物品包代号',
+                                    FOREIGN KEY (item_package_code) REFERENCES item_package(code)
+                                        ON DELETE CASCADE ON UPDATE CASCADE
+);
+

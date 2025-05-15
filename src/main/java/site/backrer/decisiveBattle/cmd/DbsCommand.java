@@ -1,25 +1,42 @@
 package site.backrer.decisiveBattle.cmd;
 
+import de.tr7zw.nbtapi.NBT;
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-import site.backrer.decisiveBattle.Dao.BoxDAO;
-import site.backrer.decisiveBattle.Dao.LeaveDAO;
-import site.backrer.decisiveBattle.Dao.SceneDAO;
-import site.backrer.decisiveBattle.Dao.SpawnDAO;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
+import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.inventory.InventoryCloseEvent;
+import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
+import site.backrer.decisiveBattle.Dao.*;
 import site.backrer.decisiveBattle.DecisiveBattle;
+import site.backrer.decisiveBattle.Entity.ItemPackage;
 import site.backrer.decisiveBattle.Entity.Scene;
 import site.backrer.decisiveBattle.Entity.Vector3;
+import site.backrer.decisiveBattle.Holder.ItemPackageGUIHolder;
+import site.backrer.decisiveBattle.Utils.ItemUtils;
 import site.backrer.decisiveBattle.Utils.VectorUtils;
 
-public class DbsCommand implements CommandExecutor {
+import java.io.IOException;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+public class DbsCommand implements CommandExecutor, Listener {
     private final SceneDAO sceneDAO = new SceneDAO();
     private final SpawnDAO spawnDAO = new SpawnDAO();
     private final BoxDAO boxDAO = new BoxDAO();
     private final LeaveDAO leaveDAO = new LeaveDAO();
+    private final ItemPackageDAO itemPackageDAO = new ItemPackageDAO();
+    private Inventory gui = null;
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
@@ -56,6 +73,12 @@ public class DbsCommand implements CommandExecutor {
                 } else {
                     createGame(player,args[1], args[2], args[3], args[4]);
                 }
+                break;
+            case "itemgui":
+                openItemPackageGUI(player, args[1], 0);
+                break;
+            case "itemadd":
+                addItem(player,args[1],args[2]);
                 break;
 
             case "edit":
@@ -128,6 +151,32 @@ public class DbsCommand implements CommandExecutor {
         }
 
         return true;
+    }
+
+    //添加物品
+    private void addItem(Player player, String arg1,String arg2) {
+        ItemStack itemInMainHand = player.getInventory().getItemInMainHand();
+        if (itemInMainHand.getType() == Material.AIR) {
+            player.sendMessage("空物品！");
+            return;
+        }
+        ItemPackage itemPackage = new ItemPackage(arg1,"text",ItemUtils.itemStackToBase64(itemInMainHand),arg2);
+        itemPackageDAO.insertItemPackage(itemPackage);
+    }
+
+    @EventHandler
+    public void onInventoryClick(InventoryClickEvent event) {
+        if (event.getWhoClicked() instanceof Player player) {
+            player.sendMessage(ItemUtils.getNBTTag(event.getCurrentItem(),"base64"));
+        }
+        if (gui.getHolder() == event.getWhoClicked()) {
+            event.setCancelled(true);
+        }
+    }
+
+    @EventHandler
+    public void onInventoryClose(InventoryCloseEvent event) {
+
     }
 
     private void setPos(Player player, int id) {
@@ -224,5 +273,46 @@ public class DbsCommand implements CommandExecutor {
     private String locToString(Location loc) {
         return String.format("[%s] %.1f, %.1f, %.1f", loc.getWorld().getName(), loc.getX(), loc.getY(), loc.getZ());
     }
+    public void openItemPackageGUI(Player player, String packageCode, int page) {
+
+        List<ItemPackage> packages = itemPackageDAO.getAllByCode(packageCode);
+        int totalPages = (int) Math.ceil(packages.size() / 45.0);
+
+        gui = Bukkit.createInventory(
+                new ItemPackageGUIHolder(packageCode, page),
+                54,
+                ChatColor.GOLD + "物品包管理 - " + "总页数:"+totalPages + " 页"
+        );
+        gui.setItem(49,createButtonItem(Material.ARROW, ChatColor.RED +"|当前页数:"+page+1));
+        if (!packages.isEmpty()){
+            // 显示物品
+            int start = page * 45;
+            for (int i = 0; i < 45 && (start + i) < packages.size(); i++) {
+                try {
+                    String base64 = packages.get(start + i).getBase64();
+                    ItemStack itemStack = ItemUtils.itemStackFromBase64(base64);
+                    ItemUtils.setNBTTag(itemStack,"base64",base64);
+                    gui.setItem(i, itemStack);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+            // 翻页按钮
+            if (page > 0) gui.setItem(45, createButtonItem(Material.ARROW, ChatColor.GREEN + "上一页"));
+            if (start + 45 < packages.size()) gui.setItem(53, createButtonItem(Material.ARROW, ChatColor.GREEN + "下一页"));
+        }
+
+
+        player.openInventory(gui);
+    }
+
+    private ItemStack createButtonItem(Material mat, String name) {
+        ItemStack item = new ItemStack(mat);
+        ItemMeta meta = item.getItemMeta();
+        meta.setDisplayName(name);
+        item.setItemMeta(meta);
+        return item;
+    }
+
 }
 

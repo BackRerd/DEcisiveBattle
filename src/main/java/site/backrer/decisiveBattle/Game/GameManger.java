@@ -2,6 +2,7 @@ package site.backrer.decisiveBattle.Game;
 
 import org.bukkit.entity.Player;
 import site.backrer.decisiveBattle.Dao.BoxDAO;
+import site.backrer.decisiveBattle.Dao.LeaveDAO;
 import site.backrer.decisiveBattle.Dao.SpawnDAO;
 import site.backrer.decisiveBattle.Entity.Vector3;
 
@@ -14,17 +15,19 @@ public class GameManger {
     private final Map<Integer,GameScene> scenes = new HashMap<>();
     private final SpawnDAO spawnDAO = new SpawnDAO();
     private final BoxDAO boxDAO = new BoxDAO();
+    private final LeaveDAO leaveDAO = new LeaveDAO();
 
     public GameScene createScene(int code,int maxPlayer,int minPlayer,String sceneName,double pos1,double pos2,String wordName) {
         GameScene scene = new GameScene(code,maxPlayer,minPlayer,sceneName,pos1,pos2,wordName);
         scene.registerEvents();//注册监听事件
-        scene.startTask(0L,20L); //启用Tick游戏事件处理器
         //获取出生点
         List<Vector3> spawnsBySceneId = spawnDAO.getSpawnsBySceneId(code);
         //获取宝箱位置
         List<Vector3> boxesBySceneId = boxDAO.getBoxesBySceneId(code);
+        //获取撤离地点
+        List<Vector3> leaveSpawnBySceneId = leaveDAO.getSpawnsBySceneId(code);
         //初始化场景信息
-        scene.initialization(spawnsBySceneId,boxesBySceneId);
+        scene.initialization(spawnsBySceneId,boxesBySceneId,leaveSpawnBySceneId);
         //注册到表内
         scenes.put(code, scene);
         return scene;
@@ -48,7 +51,7 @@ public class GameManger {
         }
     }
     //停止游戏
-    public void endScene(String id) {
+    public void endScene(int id) {
         GameScene scene = scenes.get(id);
         if (scene != null){
             scene.cancel();

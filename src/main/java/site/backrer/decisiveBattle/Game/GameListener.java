@@ -9,6 +9,7 @@ import org.bukkit.event.player.PlayerQuitEvent;
 public class GameListener implements Listener {
     private final GameScene scene;
 
+
     public GameListener(GameScene scene) {
         this.scene = scene;
     }
