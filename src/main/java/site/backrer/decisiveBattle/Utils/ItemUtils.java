@@ -2,6 +2,7 @@ package site.backrer.decisiveBattle.Utils;
 
 import de.tr7zw.nbtapi.NBT;
 import de.tr7zw.nbtapi.NBTItem;
+import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.io.BukkitObjectInputStream;
 import org.bukkit.util.io.BukkitObjectOutputStream;
@@ -19,6 +20,9 @@ public class ItemUtils {
     }
 
     public static String getNBTTag(ItemStack item, String key) {
+        if (item == null || item.getType() == Material.AIR || item.getAmount() <= 0) {
+            return null; // 或者抛出你自定义的异常，或返回 Optional.empty()
+        }
         return NBT.get(item, nbt-> {
             return nbt.getString(key);
         });

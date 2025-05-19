@@ -1,21 +1,24 @@
 package site.backrer.decisiveBattle.Game;
 
+import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
-import site.backrer.decisiveBattle.Dao.BoxDAO;
-import site.backrer.decisiveBattle.Dao.LeaveDAO;
-import site.backrer.decisiveBattle.Dao.SpawnDAO;
+import org.bukkit.inventory.ItemStack;
+import site.backrer.decisiveBattle.Dao.*;
+import site.backrer.decisiveBattle.Entity.ItemPackage;
+import site.backrer.decisiveBattle.Entity.SceneItemBinding;
 import site.backrer.decisiveBattle.Entity.Vector3;
+import site.backrer.decisiveBattle.Utils.ItemUtils;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.io.IOException;
+import java.util.*;
 
 public class GameManger {
     private final Map<Integer,GameScene> scenes = new HashMap<>();
     private final SpawnDAO spawnDAO = new SpawnDAO();
     private final BoxDAO boxDAO = new BoxDAO();
     private final LeaveDAO leaveDAO = new LeaveDAO();
+    private final ItemPackageDAO itemPackageDAO = new ItemPackageDAO();
+    private final SceneItemBindingDAO sceneItemBindingDAO = new SceneItemBindingDAO();
 
     public GameScene createScene(int code,int maxPlayer,int minPlayer,String sceneName,double pos1,double pos2,String wordName) {
         GameScene scene = new GameScene(code,maxPlayer,minPlayer,sceneName,pos1,pos2,wordName);
@@ -26,8 +29,28 @@ public class GameManger {
         List<Vector3> boxesBySceneId = boxDAO.getBoxesBySceneId(code);
         //获取撤离地点
         List<Vector3> leaveSpawnBySceneId = leaveDAO.getSpawnsBySceneId(code);
+        //获取并且注册所有物品
+        List<SceneItemBinding> bindingsBySceneId = sceneItemBindingDAO.getBindingsBySceneId(code);
+        HashMap<String,List<ItemStack>> items = new HashMap<>();
+        for (SceneItemBinding sceneItemBinding : bindingsBySceneId) {
+            //获取所有物品
+            List<ItemPackage> allByCode = itemPackageDAO.getAllByCode(sceneItemBinding.getItemPackageCode());
+            //临时物品表
+            List<ItemStack> items1 = new ArrayList<>();
+            //注册物品
+            for (ItemPackage itemPackage : allByCode) {
+                try {
+                    //添加到表内
+                    items1.add(ItemUtils.itemStackFromBase64(itemPackage.getBase64()));
+                } catch (IOException | ClassNotFoundException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+            //添加到表中
+            items.put(sceneItemBinding.getItemPackageCode(),items1);
+        }
         //初始化场景信息
-        scene.initialization(spawnsBySceneId,boxesBySceneId,leaveSpawnBySceneId);
+        scene.initialization(spawnsBySceneId,boxesBySceneId,leaveSpawnBySceneId,items);
         //注册到表内
         scenes.put(code, scene);
         return scene;

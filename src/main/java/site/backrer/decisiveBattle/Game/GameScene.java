@@ -3,11 +3,14 @@ package site.backrer.decisiveBattle.Game;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.block.Chest;
+import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
 import org.bukkit.event.HandlerList;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
+import site.backrer.decisiveBattle.Board.ScoreBoard;
 import site.backrer.decisiveBattle.DecisiveBattle;
 import site.backrer.decisiveBattle.Entity.Vector3;
 import site.backrer.decisiveBattle.Utils.RunnableUtil;
@@ -15,10 +18,7 @@ import site.backrer.decisiveBattle.Utils.VectorUtils;
 import site.backrer.decisiveBattle.actions.ContinuouslyExecutingEvents;
 import site.backrer.decisiveBattle.actions.NotifyAfterDelay;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 
 
 public class GameScene extends BukkitRunnable {
@@ -33,6 +33,7 @@ public class GameScene extends BukkitRunnable {
     private List<Vector3> spawns = new ArrayList<>(); //出生地点
     private List<Vector3> boxs = new ArrayList<>(); //宝箱位置
     private List<Vector3> leaveSpawns = new ArrayList<>(); //撤离地点
+    private HashMap<String,List<ItemStack>> items = new HashMap<>();
 
     private final int maxTime = 480; //总游戏时间
 
@@ -58,10 +59,11 @@ public class GameScene extends BukkitRunnable {
     }
 
     //初始化场景信息
-    public void initialization(List<Vector3> spawns, List<Vector3> boxs, List<Vector3> leaveSpawns) {
+    public void initialization(List<Vector3> spawns, List<Vector3> boxs, List<Vector3> leaveSpawns,HashMap<String,List<ItemStack>> items) {
         this.spawns = spawns;
         this.boxs = boxs;
         this.leaveSpawns = leaveSpawns;
+        this.items = items;
     }
     //节省计算开销
     int shuputime = (int) (maxTime*0.5);
@@ -86,10 +88,20 @@ public class GameScene extends BukkitRunnable {
         if (thisPlayers.size() == 1){//只剩一个玩家时
             if (currentTime > gongbutime)currentTime = gongbutime;
         }
+        if (thisPlayers.isEmpty()){
+            //5秒后结束场景
+            RunnableUtil.AfterDelay(() -> {
+                DecisiveBattle.getGameManger().endScene(this.code);
+            },5L);
+        }
     }
 
     //玩家进入场景事件:0加入成功,1加入失败以存在该玩家,2游戏已经开启。
     public int joinPlayer(Player player){
+        //当存在人时，开启信息计分板
+        if (thisPlayers.size() > 1){
+            ScoreBoardTick();
+        }
         if (isStarted){
             return 2;
         }
@@ -103,7 +115,7 @@ public class GameScene extends BukkitRunnable {
 
             //倒计时准备开始游戏
             RunnableUtil.startRepeating(new ContinuouslyExecutingEvents() {
-                private int counter = countTimeMax;
+                private int counter = countTimeMax; //获取默认等待时间
                 @Override
                 public boolean isTick() {
                     if (thisPlayers.size() < minPlayerSize){
@@ -118,6 +130,11 @@ public class GameScene extends BukkitRunnable {
                     counter--; //减少时间
                     countDown = counter; //记录当前剩余时间，给予整个使用
                     sendAllMessages("游戏将在:"+countDown+"秒后开启!");
+                    //人数大于70%时让时间减少到10秒
+                    if (thisPlayers.size() > maxPlayerSize * 0.7 && counter > 10){
+                        counter = 10;
+                    }
+                    //时间归零后开始游戏
                     if (counter <= 0){
                         //游戏开始
                         isStarted = true;
@@ -190,7 +207,19 @@ public class GameScene extends BukkitRunnable {
 
         //启动场景
         this.startTask(1L, 20L);
+    }
+    private void ScoreBoardTick(){
+        RunnableUtil.startRepeating(new ContinuouslyExecutingEvents() {
+            @Override
+            public boolean isTick() {
+                return thisPlayers.isEmpty();
+            }
 
+            @Override
+            public void event1() {
+                //积分版逻辑
+            }
+        },1L);
     }
 
     ///  get And set

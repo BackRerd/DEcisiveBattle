@@ -37,10 +37,11 @@ public final class DecisiveBattle extends JavaPlugin {
         getCommand("dbs").setExecutor(dbsCommand);
         //注册事件
         Bukkit.getPluginManager().registerEvents(dbsCommand, this);
+        //测试数据库连接
         try {
             Connection connection = DBUtil.getConnection();
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            getLogger().warning("数据库连接失败！错误信息:"+e.getMessage());
         }
         //nbt前置加载加载
         if (!NBT.preloadApi()) {

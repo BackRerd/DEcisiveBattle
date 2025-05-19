@@ -2,10 +2,7 @@ package site.backrer.decisiveBattle.Board;
 
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
-import org.bukkit.scoreboard.Criteria;
-import org.bukkit.scoreboard.DisplaySlot;
-import org.bukkit.scoreboard.Objective;
-import org.bukkit.scoreboard.Scoreboard;
+import org.bukkit.scoreboard.*;
 
 import java.util.List;
 
@@ -21,9 +18,12 @@ public class ScoreBoard {
         scoreboard = Bukkit.getScoreboardManager().getNewScoreboard();
         objective = scoreboard.registerNewObjective(String.valueOf(player.getUniqueId()), Criteria.DUMMY,title);
         objective.setDisplaySlot(DisplaySlot.SIDEBAR);
+        objective.setDisplayName(title);
     }
     public void setList(List<String> list){
-
+        for (String ll : list){
+            objective.getScore(ll).setScore(0);
+        }
     }
 
     public void showSidebar(){

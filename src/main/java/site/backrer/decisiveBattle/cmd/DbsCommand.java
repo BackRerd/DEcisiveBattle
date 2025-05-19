@@ -166,12 +166,19 @@ public class DbsCommand implements CommandExecutor, Listener {
 
     @EventHandler
     public void onInventoryClick(InventoryClickEvent event) {
-        if (event.getWhoClicked() instanceof Player player) {
-            player.sendMessage(ItemUtils.getNBTTag(event.getCurrentItem(),"base64"));
+        if (gui == null) {
+            return;
         }
-        if (gui.getHolder() == event.getWhoClicked()) {
-            event.setCancelled(true);
+        if (event.getInventory().getHolder() == gui.getHolder()){
+            if (event.getWhoClicked() instanceof Player player) {
+                String base64 = ItemUtils.getNBTTag(event.getCurrentItem(), "base64");
+                if (base64 != null) {
+                    player.sendMessage(base64);
+                }
+            }
         }
+
+
     }
 
     @EventHandler
@@ -277,7 +284,6 @@ public class DbsCommand implements CommandExecutor, Listener {
 
         List<ItemPackage> packages = itemPackageDAO.getAllByCode(packageCode);
         int totalPages = (int) Math.ceil(packages.size() / 45.0);
-
         gui = Bukkit.createInventory(
                 new ItemPackageGUIHolder(packageCode, page),
                 54,
@@ -301,7 +307,6 @@ public class DbsCommand implements CommandExecutor, Listener {
             if (page > 0) gui.setItem(45, createButtonItem(Material.ARROW, ChatColor.GREEN + "上一页"));
             if (start + 45 < packages.size()) gui.setItem(53, createButtonItem(Material.ARROW, ChatColor.GREEN + "下一页"));
         }
-
 
         player.openInventory(gui);
     }
